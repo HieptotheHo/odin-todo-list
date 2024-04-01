@@ -2,106 +2,8 @@ import './style.css'
 import { createTodo } from './todo'
 import {isToday, isThisWeek, compareAsc} from 'date-fns'
 var toDos = []
-
-
-
+localStorage.clear()
 const Controller = () => {
-    const filterTodos = (category,toDos) => {
-        switch(category) {
-            case 'All':
-                update(toDos)
-                break;
-            case 'Today':
-                update(toDos.filter(todo=>{
-                    console.log(new Date(todo.due))
-                    return isToday(new Date(todo.due))
-                }
-                ))
-                break;
-            case 'This Week':
-                update(toDos.filter(todo=>{
-                    console.log(new Date(todo.due))
-                    return isThisWeek(new Date(todo.due))
-                }))
-                break;
-            case 'Overdue':
-                update(toDos.filter(todo=>{
-                    console.log(new Date(todo.due))
-                    return compareAsc(new Date(), todo.due)
-                }))
-                break;
-        }
-    }
-    //MENU
-    // const chosenMennu = document.querySelector('.menu-chosen')
-
-    const menus = document.querySelectorAll('#menu > ul >li');
-    menus.forEach(menu => {
-        menu.addEventListener('click', (e)=>{
-            const chosenMennu = document.querySelector('.menu-chosen')
-            chosenMennu.classList.remove('menu-chosen')
-            menu.classList.add('menu-chosen')
-            filterTodos(menu.textContent,toDos)
-        })     
-    })
-    
-    const addButton = document.querySelector('.add')
-    const modal = document.querySelector('.modal')
-    const cancelButton = document.querySelector('button[type=reset]')
-
-    const form = document.querySelector('form')
-    // Adding new task
-    addButton.addEventListener('mouseover',e=>{
-        document.querySelector('.add>div').style.backgroundColor = "var(--theme)"
-    })
-    addButton.addEventListener('mouseout', e=>{
-        document.querySelector('.add>div').style.backgroundColor = "rgb(233, 233, 233)"
-    })
-    addButton.addEventListener('click', e=>{
-        modal.showModal()
-    })
-    
-    const addTaskButton = document.querySelector('.modal>form>.add-task>p')
-    const addNewTask = document.querySelector('.modal>form>.add-task>input')
-    const taskContainer = document.querySelector('.modal>form>#task-container')
-    console.log(taskContainer)
-    addTaskButton.addEventListener('click',(e)=>{
-        if(addNewTask.value) {
-            const newTask = document.createElement('div')
-            newTask.classList.add('task')
-            newTask.innerHTML=`
-                <p>${addNewTask.value}</p>
-                <input type='checkbox'>
-            `
-            // form.insertBefore(newTask,document.querySelector('.modal>form>#buttons'))
-            taskContainer.appendChild(newTask)
-            addNewTask.value=''
-        }
-        
-    })
-   
-    cancelButton.addEventListener('click',(e)=>{
-        modal.close()
-        document.querySelector('#task-container').innerHTML=''
-    })
-
-    form.addEventListener('submit',(e)=>{
-        const data = new FormData(e.target);
-        //GET DATA from FORM
-        let title = data.get('title');
-        let description = data.get('description');
-        let due = data.get('due')
-
-        //CREATE new object and its DOM
-        const newTodo = createTodo(title,description,due)
-        toDos.push(newTodo)
-
-        update(toDos)
-
-        form.reset();
-        document.querySelector('#task-container').innerHTML=''
-    })
-
     //UPDATE
     const update = (toDos) => {
         const toDoContainer = document.querySelector('#to-do-container');
@@ -125,6 +27,7 @@ const Controller = () => {
                 newTodo.addTask(taskName,taskDone)
             })
             
+            localStorage.setItem('to-dos',JSON.stringify(toDos))
             addDeleteTaskButton(todoDOM, newTodo);
             addModalToDo(todoDOM, newTodo)
             
@@ -238,5 +141,110 @@ const Controller = () => {
             percentage.style.visibility='hidden'
         })
     }
+    if(!localStorage.getItem('to-dos')) {
+        console.log('too bad!')
+    } else {
+        console.log(localStorage)
+        JSON.parse(localStorage.getItem('to-dos')).forEach(todo => {
+            toDos.push(createTodo(todo.title,todo.description,todo.due,todo.tasks))
+        })
+        update(toDos)
+    }
+    const filterTodos = (category,toDos) => {
+        switch(category) {
+            case 'All':
+                update(toDos)
+                break;
+            case 'Today':
+                update(toDos.filter(todo=>{
+                    console.log(new Date(todo.due))
+                    return isToday(new Date(todo.due))
+                }
+                ))
+                break;
+            case 'This Week':
+                update(toDos.filter(todo=>{
+                    console.log(new Date(todo.due))
+                    return isThisWeek(new Date(todo.due))
+                }))
+                break;
+            case 'Overdue':
+                update(toDos.filter(todo=>{
+                    console.log(new Date(todo.due))
+                    return compareAsc(new Date(), todo.due)
+                }))
+                break;
+        }
+    }
+    //MENU
+    // const chosenMennu = document.querySelector('.menu-chosen')
+
+    const menus = document.querySelectorAll('#menu > ul >li');
+    menus.forEach(menu => {
+        menu.addEventListener('click', (e)=>{
+            const chosenMennu = document.querySelector('.menu-chosen')
+            chosenMennu.classList.remove('menu-chosen')
+            menu.classList.add('menu-chosen')
+            filterTodos(menu.textContent,toDos)
+        })     
+    })
+    
+    const addButton = document.querySelector('.add')
+    const modal = document.querySelector('.modal')
+    const cancelButton = document.querySelector('button[type=reset]')
+
+    const form = document.querySelector('form')
+    // Adding new task
+    addButton.addEventListener('mouseover',e=>{
+        document.querySelector('.add>div').style.backgroundColor = "var(--theme)"
+    })
+    addButton.addEventListener('mouseout', e=>{
+        document.querySelector('.add>div').style.backgroundColor = "rgb(233, 233, 233)"
+    })
+    addButton.addEventListener('click', e=>{
+        modal.showModal()
+    })
+    
+    const addTaskButton = document.querySelector('.modal>form>.add-task>p')
+    const addNewTask = document.querySelector('.modal>form>.add-task>input')
+    const taskContainer = document.querySelector('.modal>form>#task-container')
+    addTaskButton.addEventListener('click',(e)=>{
+        if(addNewTask.value) {
+            const newTask = document.createElement('div')
+            newTask.classList.add('task')
+            newTask.innerHTML=`
+                <p>${addNewTask.value}</p>
+                <input type='checkbox'>
+            `
+            // form.insertBefore(newTask,document.querySelector('.modal>form>#buttons'))
+            taskContainer.appendChild(newTask)
+            addNewTask.value=''
+        }
+        
+    })
+   
+    cancelButton.addEventListener('click',(e)=>{
+        modal.close()
+        document.querySelector('#task-container').innerHTML=''
+    })
+
+    form.addEventListener('submit',(e)=>{
+        const data = new FormData(e.target);
+        //GET DATA from FORM
+        let title = data.get('title');
+        let description = data.get('description');
+        let due = data.get('due')
+
+        //CREATE new object and its DOM
+        const newTodo = createTodo(title,description,due)
+        toDos.push(newTodo)
+        console.log(newTodo.getTasks())
+        update(toDos)
+
+        form.reset();
+        document.querySelector('#task-container').innerHTML=''
+    })
+
+
 }
 Controller();

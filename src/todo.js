@@ -1,6 +1,5 @@
 
-const createTodo = (title,description,due)=>{
-    const tasks = [];
+const createTodo = (title,description,due,tasks=[])=>{
     
     const addTask = (taskName, done) => {
         tasks.push(createTask(taskName,done))
@@ -18,7 +17,7 @@ const createTodo = (title,description,due)=>{
     
     
     return {
-        title: title,description:description, due: due,
+        title: title,description:description, due: due,tasks:tasks,
         addTask, getTasks,
         getNumberOfTasks,
         getNumberOfDoneTasks,
