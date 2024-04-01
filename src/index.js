@@ -171,7 +171,8 @@ const Controller = () => {
             case 'Overdue':
                 update(toDos.filter(todo=>{
                     console.log(new Date(todo.due))
-                    return compareAsc(new Date(), todo.due)
+                    console.log()
+                    return compareAsc(new Date(), todo.due)==-1?false:true
                 }))
                 break;
         }
